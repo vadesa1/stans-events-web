@@ -80,6 +80,7 @@ export const EventDetails: React.FC = () => {
   const venueName = event.venue || event._embedded?.venues?.[0]?.name || 'Venue TBD';
   const venueAddress = event.address || event._embedded?.venues?.[0]?.address?.line1;
   const eventImage = event.image_url || event.images?.[0]?.url;
+  const eventDescription = event.description || event.info;
 
   return (
     <div className="container mx-auto px-4 py-8">
