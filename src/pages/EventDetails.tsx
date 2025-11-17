@@ -76,6 +76,11 @@ export const EventDetails: React.FC = () => {
     );
   }
 
+  // Extract data from either format (simplified or Ticketmaster)
+  const venueName = event.venue || event._embedded?.venues?.[0]?.name || 'Venue TBD';
+  const venueAddress = event.address || event._embedded?.venues?.[0]?.address?.line1;
+  const eventImage = event.image_url || event.images?.[0]?.url;
+
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Back Button */}
@@ -87,10 +92,10 @@ export const EventDetails: React.FC = () => {
       {/* Event Details */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
         <div className="lg:col-span-2">
-          {event.image_url && (
+          {eventImage && (
             <div className="aspect-video w-full overflow-hidden rounded-lg mb-6">
               <img
-                src={event.image_url}
+                src={eventImage}
                 alt={event.name}
                 className="w-full h-full object-cover"
               />
@@ -102,13 +107,13 @@ export const EventDetails: React.FC = () => {
           <div className="space-y-3 text-muted-foreground mb-6">
             <div className="flex items-start gap-3">
               <Calendar className="h-5 w-5 flex-shrink-0 mt-0.5" />
-              <span>{formatDateTime((event as any).dates || (event as any).date)}</span>
+              <span>{formatDateTime(event.dates || event.date)}</span>
             </div>
             <div className="flex items-start gap-3">
               <MapPin className="h-5 w-5 flex-shrink-0 mt-0.5" />
               <div>
-                <p>{event.venue}</p>
-                {event.address && <p className="text-sm">{event.address}</p>}
+                <p>{venueName}</p>
+                {venueAddress && <p className="text-sm">{venueAddress}</p>}
               </div>
             </div>
           </div>
