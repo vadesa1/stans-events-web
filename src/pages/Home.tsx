@@ -55,9 +55,9 @@ export const Home: React.FC = () => {
 
       // Add location parameters if available
       if (userLocation) {
-        params.latitude = userLocation.latitude;
-        params.longitude = userLocation.longitude;
-        params.radius = 50; // 50 miles radius
+        params.lat = userLocation.latitude;
+        params.lon = userLocation.longitude;
+        // Note: radius is hardcoded to 50 on backend
       }
 
       const data = await getEvents(params);
@@ -82,9 +82,9 @@ export const Home: React.FC = () => {
 
       // Add location parameters if available
       if (userLocation) {
-        params.latitude = userLocation.latitude;
-        params.longitude = userLocation.longitude;
-        params.radius = 50; // 50 miles radius
+        params.lat = userLocation.latitude;
+        params.lon = userLocation.longitude;
+        // Note: radius is hardcoded to 50 on backend
       }
 
       const data = await searchEvents(params);
