@@ -1,19 +1,53 @@
 /**
  * Event model from backend
+ * Supports both simplified format (from listing) and Ticketmaster format (from single event fetch)
  */
 export interface Event {
   id: string;
   ticketmaster_id?: string;
   name: string;
-  venue: string;
-  date: string;
-  latitude: number;
-  longitude: number;
-  source: 'ticketmaster' | 'admin_created' | 'restaurant_created';
-  approval_status: 'approved' | 'pending_approval' | 'rejected';
+  venue?: string; // Optional for Ticketmaster format
+  date?: string; // Simple format from listing
+  dates?: { // Ticketmaster format from single event fetch
+    start: {
+      localDate?: string;
+      localTime?: string;
+      dateTime?: string;
+    };
+  };
+  _embedded?: { // Ticketmaster venue data
+    venues?: Array<{
+      name?: string;
+      location?: {
+        latitude?: string;
+        longitude?: string;
+      };
+      address?: {
+        line1?: string;
+      };
+      city?: {
+        name?: string;
+      };
+      state?: {
+        name?: string;
+        stateCode?: string;
+      };
+    }>;
+  };
+  latitude?: number;
+  longitude?: number;
+  source?: 'ticketmaster' | 'admin_created' | 'restaurant_created';
+  approval_status?: 'approved' | 'pending_approval' | 'rejected';
   category?: string;
   image_url?: string;
+  images?: Array<{ // Ticketmaster images
+    url: string;
+    ratio?: string;
+    width?: number;
+    height?: number;
+  }>;
   description?: string;
+  info?: string; // Ticketmaster description field
   address?: string;
   city?: string;
   state?: string;
