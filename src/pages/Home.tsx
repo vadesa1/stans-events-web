@@ -51,7 +51,7 @@ export const Home: React.FC = () => {
   const loadEvents = async () => {
     try {
       setLoading(true);
-      const params: any = { size: 20 }; // Backend expects 'size', not 'limit'
+      const params: any = { size: 12 }; // Reduced from 20 to 12 for faster loading
 
       // Add location parameters if available
       if (userLocation) {
@@ -78,7 +78,7 @@ export const Home: React.FC = () => {
 
     try {
       setLoading(true);
-      const params: any = { query: searchQuery, size: 20 }; // Backend expects 'size'
+      const params: any = { query: searchQuery, size: 12 }; // Reduced for faster loading
 
       // Add location parameters if available
       if (userLocation) {
