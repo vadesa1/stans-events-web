@@ -138,10 +138,12 @@ export const EventDetails: React.FC = () => {
                   <p className="font-medium">{event.category}</p>
                 </div>
               )}
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Source</p>
-                <p className="font-medium capitalize">{event.source.replace('_', ' ')}</p>
-              </div>
+              {event.source && (
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Source</p>
+                  <p className="font-medium capitalize">{event.source.replace('_', ' ')}</p>
+                </div>
+              )}
               {event.city && (
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">Location</p>

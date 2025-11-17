@@ -133,7 +133,9 @@ export const Home: React.FC = () => {
                   </div>
                   <div className="flex items-start gap-2 mt-1">
                     <MapPin className="h-4 w-4 flex-shrink-0 mt-0.5" />
-                    <span className="line-clamp-1">{event.venue}</span>
+                    <span className="line-clamp-1">
+                      {event.venue || (event as any)._embedded?.venues?.[0]?.name || 'Venue TBD'}
+                    </span>
                   </div>
                 </CardDescription>
               </CardHeader>
