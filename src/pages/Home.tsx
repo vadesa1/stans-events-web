@@ -12,16 +12,55 @@ export const Home: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    loadEvents();
+    getUserLocation();
   }, []);
+
+  useEffect(() => {
+    if (userLocation || locationError) {
+      loadEvents();
+    }
+  }, [userLocation, locationError]);
+
+  const getUserLocation = () => {
+    if (!navigator.geolocation) {
+      console.warn('Geolocation not supported');
+      setLocationError('Geolocation not supported');
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setUserLocation({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        });
+        console.log('User location:', position.coords.latitude, position.coords.longitude);
+      },
+      (error) => {
+        console.warn('Error getting location:', error.message);
+        setLocationError(error.message);
+      }
+    );
+  };
 
   const loadEvents = async () => {
     try {
       setLoading(true);
-      const data = await getEvents({ limit: 20 });
+      const params: any = { limit: 20 };
+
+      // Add location parameters if available
+      if (userLocation) {
+        params.latitude = userLocation.latitude;
+        params.longitude = userLocation.longitude;
+        params.radius = 50; // 50 miles radius
+      }
+
+      const data = await getEvents(params);
       setEvents(data);
     } catch (error) {
       console.error('Error loading events:', error);
@@ -39,7 +78,16 @@ export const Home: React.FC = () => {
 
     try {
       setLoading(true);
-      const data = await searchEvents({ query: searchQuery, limit: 20 });
+      const params: any = { query: searchQuery, limit: 20 };
+
+      // Add location parameters if available
+      if (userLocation) {
+        params.latitude = userLocation.latitude;
+        params.longitude = userLocation.longitude;
+        params.radius = 50; // 50 miles radius
+      }
+
+      const data = await searchEvents(params);
       setEvents(data);
     } catch (error) {
       console.error('Error searching events:', error);
