@@ -29,10 +29,20 @@ export const EventDetails: React.FC = () => {
         getEvent(id),
         getEventDeals(id, 10), // Search within 10 miles
       ]);
+
+      if (!eventData) {
+        console.error('Event not found');
+        setEvent(null);
+        setDeals([]);
+        return;
+      }
+
       setEvent(eventData);
       setDeals(dealsData);
     } catch (error) {
       console.error('Error loading event data:', error);
+      setEvent(null);
+      setDeals([]);
     } finally {
       setLoading(false);
     }
