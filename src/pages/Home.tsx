@@ -51,7 +51,7 @@ export const Home: React.FC = () => {
   const loadEvents = async () => {
     try {
       setLoading(true);
-      const params: any = { limit: 20 };
+      const params: any = { size: 20 }; // Backend expects 'size', not 'limit'
 
       // Add location parameters if available
       if (userLocation) {
@@ -78,7 +78,7 @@ export const Home: React.FC = () => {
 
     try {
       setLoading(true);
-      const params: any = { query: searchQuery, limit: 20 };
+      const params: any = { query: searchQuery, size: 20 }; // Backend expects 'size'
 
       // Add location parameters if available
       if (userLocation) {
