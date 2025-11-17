@@ -83,7 +83,7 @@ export const EventDetails: React.FC = () => {
           <div className="space-y-3 text-muted-foreground mb-6">
             <div className="flex items-start gap-3">
               <Calendar className="h-5 w-5 flex-shrink-0 mt-0.5" />
-              <span>{formatDateTime(event.date)}</span>
+              <span>{formatDateTime((event as any).dates || (event as any).date)}</span>
             </div>
             <div className="flex items-start gap-3">
               <MapPin className="h-5 w-5 flex-shrink-0 mt-0.5" />

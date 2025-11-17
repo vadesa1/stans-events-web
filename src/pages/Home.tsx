@@ -129,7 +129,7 @@ export const Home: React.FC = () => {
                 <CardDescription>
                   <div className="flex items-start gap-2 mt-2">
                     <Calendar className="h-4 w-4 flex-shrink-0 mt-0.5" />
-                    <span>{formatDate(event.date)}</span>
+                    <span>{formatDate((event as any).dates || (event as any).date)}</span>
                   </div>
                   <div className="flex items-start gap-2 mt-1">
                     <MapPin className="h-4 w-4 flex-shrink-0 mt-0.5" />
