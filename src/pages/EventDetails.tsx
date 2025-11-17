@@ -113,9 +113,9 @@ export const EventDetails: React.FC = () => {
             </div>
           </div>
 
-          {event.description && (
+          {eventDescription && (
             <div className="prose max-w-none">
-              <p>{event.description}</p>
+              <p className="whitespace-pre-line">{eventDescription}</p>
             </div>
           )}
         </div>
