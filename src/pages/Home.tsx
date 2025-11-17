@@ -11,13 +11,9 @@ import { formatDate } from '@/lib/utils';
 export const Home: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
-  const [hasMore, setHasMore] = useState(true);
-  const [currentPage, setCurrentPage] = useState(0);
-  const EVENTS_PER_PAGE = 12;
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -55,8 +51,7 @@ export const Home: React.FC = () => {
   const loadEvents = async () => {
     try {
       setLoading(true);
-      setCurrentPage(0);
-      const params: any = { size: EVENTS_PER_PAGE };
+      const params: any = { size: 20 };
 
       // Add location parameters if available
       if (userLocation) {
@@ -67,44 +62,10 @@ export const Home: React.FC = () => {
 
       const data = await getEvents(params);
       setEvents(data);
-      setHasMore(data.length === EVENTS_PER_PAGE);
     } catch (error) {
       console.error('Error loading events:', error);
-      setHasMore(false);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const loadMoreEvents = async () => {
-    if (loadingMore || !hasMore) return;
-
-    try {
-      setLoadingMore(true);
-      const nextPage = currentPage + 1;
-      const params: any = {
-        size: EVENTS_PER_PAGE,
-        page: nextPage // Using page-based pagination
-      };
-
-      // Add location parameters if available
-      if (userLocation) {
-        params.lat = userLocation.latitude;
-        params.lon = userLocation.longitude;
-      }
-
-      const data = searchQuery
-        ? await searchEvents({ ...params, query: searchQuery })
-        : await getEvents(params);
-
-      setEvents(prev => [...prev, ...data]);
-      setCurrentPage(nextPage);
-      setHasMore(data.length === EVENTS_PER_PAGE);
-    } catch (error) {
-      console.error('Error loading more events:', error);
-      setHasMore(false);
-    } finally {
-      setLoadingMore(false);
     }
   };
 
@@ -117,8 +78,7 @@ export const Home: React.FC = () => {
 
     try {
       setLoading(true);
-      setCurrentPage(0);
-      const params: any = { query: searchQuery, size: EVENTS_PER_PAGE };
+      const params: any = { query: searchQuery, size: 20 };
 
       // Add location parameters if available
       if (userLocation) {
@@ -129,10 +89,8 @@ export const Home: React.FC = () => {
 
       const data = await searchEvents(params);
       setEvents(data);
-      setHasMore(data.length === EVENTS_PER_PAGE);
     } catch (error) {
       console.error('Error searching events:', error);
-      setHasMore(false);
     } finally {
       setLoading(false);
     }
@@ -198,66 +156,43 @@ export const Home: React.FC = () => {
           <p className="text-muted-foreground">No events found. Try a different search.</p>
         </div>
       ) : (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {events.map((event) => (
-              <Card
-                key={event.id}
-                className="cursor-pointer hover:shadow-lg transition-shadow"
-                onClick={() => navigate(`/events/${event.id}`)}
-              >
-                {event.image_url && (
-                  <div className="aspect-video w-full overflow-hidden rounded-t-lg">
-                    <img
-                      src={event.image_url}
-                      alt={event.name}
-                      className="w-full h-full object-cover"
-                    />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {events.map((event) => (
+            <Card
+              key={event.id}
+              className="cursor-pointer hover:shadow-lg transition-shadow"
+              onClick={() => navigate(`/events/${event.id}`)}
+            >
+              {event.image_url && (
+                <div className="aspect-video w-full overflow-hidden rounded-t-lg">
+                  <img
+                    src={event.image_url}
+                    alt={event.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+              <CardHeader>
+                <CardTitle className="line-clamp-2">{event.name}</CardTitle>
+                <CardDescription>
+                  <div className="flex items-start gap-2 mt-2">
+                    <Calendar className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                    <span>{formatDate((event as any).dates || (event as any).date)}</span>
                   </div>
-                )}
-                <CardHeader>
-                  <CardTitle className="line-clamp-2">{event.name}</CardTitle>
-                  <CardDescription>
-                    <div className="flex items-start gap-2 mt-2">
-                      <Calendar className="h-4 w-4 flex-shrink-0 mt-0.5" />
-                      <span>{formatDate((event as any).dates || (event as any).date)}</span>
-                    </div>
-                    <div className="flex items-start gap-2 mt-1">
-                      <MapPin className="h-4 w-4 flex-shrink-0 mt-0.5" />
-                      <span className="line-clamp-1">
-                        {event.venue || (event as any)._embedded?.venues?.[0]?.name || 'Venue TBD'}
-                      </span>
-                    </div>
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button className="w-full">View Deals</Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          {/* Load More Button */}
-          {hasMore && (
-            <div className="flex justify-center mt-8">
-              <Button
-                onClick={loadMoreEvents}
-                disabled={loadingMore}
-                variant="outline"
-                size="lg"
-              >
-                {loadingMore ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2"></div>
-                    Loading...
-                  </>
-                ) : (
-                  'Load More Events'
-                )}
-              </Button>
-            </div>
-          )}
-        </>
+                  <div className="flex items-start gap-2 mt-1">
+                    <MapPin className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                    <span className="line-clamp-1">
+                      {event.venue || (event as any)._embedded?.venues?.[0]?.name || 'Venue TBD'}
+                    </span>
+                  </div>
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button className="w-full">View Deals</Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       )}
     </div>
   );
