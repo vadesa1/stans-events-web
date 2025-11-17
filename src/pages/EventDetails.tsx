@@ -62,7 +62,16 @@ export const EventDetails: React.FC = () => {
   if (!event) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <p className="text-center text-muted-foreground">Event not found</p>
+        <div className="text-center max-w-md mx-auto">
+          <h2 className="text-2xl font-bold mb-4">Event Not Found</h2>
+          <p className="text-muted-foreground mb-6">
+            The event you're looking for could not be found or is no longer available.
+          </p>
+          <Button onClick={() => navigate('/')}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Events
+          </Button>
+        </div>
       </div>
     );
   }
