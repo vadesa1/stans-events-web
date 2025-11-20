@@ -132,6 +132,9 @@ export interface User {
  */
 export interface PaymentIntentResponse {
   client_secret: string;
+  paymentIntent?: string; // For backward compatibility with mobile app
+  publishableKey: string;
+  stripeAccountId: string; // Connected account ID for Direct Charges
   purchase_id: string;
 }
 

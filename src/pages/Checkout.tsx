@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { loadStripe } from '@stripe/stripe-js';
+import { loadStripe, Stripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { getDeal, createPaymentIntent } from '@/lib/api';
 import { Deal } from '@/types';
@@ -8,9 +8,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
-
-// Note: Replace with actual Stripe publishable key from environment
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_placeholder');
 
 const CheckoutForm: React.FC<{ deal: Deal; clientSecret: string }> = ({ deal, clientSecret }) => {
   const stripe = useStripe();
@@ -88,6 +85,7 @@ export const Checkout: React.FC = () => {
   const navigate = useNavigate();
   const [deal, setDeal] = useState<Deal | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -108,6 +106,18 @@ export const Checkout: React.FC = () => {
       // Create payment intent
       const paymentData = await createPaymentIntent(id);
       setClientSecret(paymentData.client_secret);
+
+      // Load Stripe with connected account for Direct Charges
+      const publishableKey = paymentData.publishableKey || import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+      const stripeAccountId = paymentData.stripeAccountId;
+
+      if (stripeAccountId) {
+        // For Direct Charges: load Stripe with connected account
+        setStripePromise(loadStripe(publishableKey, { stripeAccount: stripeAccountId }));
+      } else {
+        // Fallback to platform account
+        setStripePromise(loadStripe(publishableKey));
+      }
     } catch (err: any) {
       setError(err.message || 'Failed to load checkout');
     } finally {
@@ -126,7 +136,7 @@ export const Checkout: React.FC = () => {
     );
   }
 
-  if (error || !deal || !clientSecret) {
+  if (error || !deal || !clientSecret || !stripePromise) {
     return (
       <div className="container mx-auto px-4 py-8">
         <Card>
