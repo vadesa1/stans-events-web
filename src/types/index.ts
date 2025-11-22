@@ -144,7 +144,8 @@ export interface PaymentIntentResponse {
 export interface DealPricing {
   original_price: number;
   discounted_price: number;
-  platform_fee: number;
+  platform_fee: number; // 18% commission
+  service_fee: number; // $1.99 flat service fee
   total_amount: number;
   savings_percentage: number;
 }
