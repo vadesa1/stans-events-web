@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 
+const SERVICE_FEE = 1.99;
+
 const CheckoutForm: React.FC<{ deal: Deal; clientSecret: string }> = ({ deal, clientSecret }) => {
   const stripe = useStripe();
   const elements = useElements();
@@ -70,7 +72,7 @@ const CheckoutForm: React.FC<{ deal: Deal; clientSecret: string }> = ({ deal, cl
         size="lg"
         disabled={!stripe || processing}
       >
-        {processing ? 'Processing...' : `Pay ${formatCurrency(deal.discounted_price)}`}
+        {processing ? 'Processing...' : `Pay ${formatCurrency(deal.discounted_price + SERVICE_FEE)}`}
       </Button>
 
       <p className="text-xs text-center text-muted-foreground">
@@ -165,13 +167,27 @@ export const Checkout: React.FC = () => {
             <CardDescription>{deal.description}</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-baseline justify-between">
-              <span className="text-muted-foreground">Total Amount</span>
-              <div className="text-right">
-                <p className="text-2xl font-bold">{formatCurrency(deal.discounted_price)}</p>
-                <p className="text-sm text-muted-foreground line-through">
-                  {formatCurrency(deal.original_price)}
-                </p>
+            <div className="space-y-3">
+              <div className="flex items-baseline justify-between">
+                <span className="text-muted-foreground">Deal Price</span>
+                <div className="text-right">
+                  <p className="text-xl font-semibold">{formatCurrency(deal.discounted_price)}</p>
+                  <p className="text-sm text-muted-foreground line-through">
+                    {formatCurrency(deal.original_price)}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-baseline justify-between text-sm">
+                <span className="text-muted-foreground">Service Fee</span>
+                <span>{formatCurrency(SERVICE_FEE)}</span>
+              </div>
+
+              <div className="border-t pt-3">
+                <div className="flex items-baseline justify-between">
+                  <span className="font-semibold text-lg">Total Amount</span>
+                  <p className="text-2xl font-bold">{formatCurrency(deal.discounted_price + SERVICE_FEE)}</p>
+                </div>
               </div>
             </div>
           </CardContent>
