@@ -159,16 +159,10 @@ export const DealDetails: React.FC = () => {
                   </span>
                 </div>
 
-                {pricing && (
-                  <div className="space-y-2 pb-3 mb-3 border-b">
-                    <div className="flex items-baseline justify-between text-sm">
-                      <span className="text-muted-foreground">Platform Commission (18%)</span>
-                      <span>{formatCurrency(pricing.platform_fee)}</span>
-                    </div>
-                    <div className="flex items-baseline justify-between text-sm">
-                      <span className="text-muted-foreground">Service Fee</span>
-                      <span>{formatCurrency(pricing.service_fee)}</span>
-                    </div>
+                {pricing && pricing.service_fee > 0 && (
+                  <div className="flex items-baseline justify-between text-sm pb-3 mb-3 border-b">
+                    <span className="text-muted-foreground">Service Fee</span>
+                    <span>{formatCurrency(pricing.service_fee)}</span>
                   </div>
                 )}
 
