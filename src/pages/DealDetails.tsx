@@ -152,25 +152,25 @@ export const DealDetails: React.FC = () => {
                     {formatCurrency(deal.original_price)}
                   </span>
                 </div>
-                <div className="flex items-baseline justify-between mb-1">
-                  <span className="text-sm text-muted-foreground">Discounted Price</span>
+                <div className="flex items-baseline justify-between mb-3">
+                  <span className="font-medium">Deal Price</span>
                   <span className="text-2xl font-bold text-green-600">
                     {formatCurrency(deal.discounted_price)}
                   </span>
                 </div>
-                {pricing && pricing.platform_fee > 0 && (
-                  <div className="flex items-baseline justify-between mb-1 text-sm">
-                    <span className="text-muted-foreground">Platform Fee</span>
-                    <span>{formatCurrency(pricing.platform_fee)}</span>
+
+                {pricing && pricing.service_fee > 0 && (
+                  <div className="flex items-baseline justify-between text-sm pb-3 mb-3 border-b">
+                    <span className="text-muted-foreground">Service Fee</span>
+                    <span>{formatCurrency(pricing.service_fee)}</span>
                   </div>
                 )}
-                <div className="border-t pt-2 mt-2">
-                  <div className="flex items-baseline justify-between font-bold">
-                    <span>Total</span>
-                    <span className="text-xl">
-                      {pricing ? formatCurrency(pricing.total_amount) : formatCurrency(deal.discounted_price)}
-                    </span>
-                  </div>
+
+                <div className="flex items-baseline justify-between font-bold">
+                  <span className="text-lg">Total</span>
+                  <span className="text-2xl">
+                    {pricing ? formatCurrency(pricing.total_amount) : formatCurrency(deal.discounted_price)}
+                  </span>
                 </div>
               </div>
 

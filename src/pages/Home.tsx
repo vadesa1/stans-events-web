@@ -7,21 +7,61 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, Calendar, MapPin, Smartphone } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
+import { isDealsEnabled } from '@/lib/featureFlags';
 
 export const Home: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    loadEvents();
+    getUserLocation();
   }, []);
+
+  useEffect(() => {
+    if (userLocation || locationError) {
+      loadEvents();
+    }
+  }, [userLocation, locationError]);
+
+  const getUserLocation = () => {
+    if (!navigator.geolocation) {
+      console.warn('Geolocation not supported');
+      setLocationError('Geolocation not supported');
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setUserLocation({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        });
+        console.log('User location:', position.coords.latitude, position.coords.longitude);
+      },
+      (error) => {
+        console.warn('Error getting location:', error.message);
+        setLocationError(error.message);
+      }
+    );
+  };
 
   const loadEvents = async () => {
     try {
       setLoading(true);
-      const data = await getEvents({ limit: 20 });
+      const params: any = { size: 20 };
+
+      // Add location parameters if available
+      if (userLocation) {
+        params.lat = userLocation.latitude;
+        params.lon = userLocation.longitude;
+        // Note: radius is hardcoded to 50 on backend
+      }
+
+      const data = await getEvents(params);
       setEvents(data);
     } catch (error) {
       console.error('Error loading events:', error);
@@ -39,7 +79,16 @@ export const Home: React.FC = () => {
 
     try {
       setLoading(true);
-      const data = await searchEvents({ query: searchQuery, limit: 20 });
+      const params: any = { query: searchQuery, size: 20 };
+
+      // Add location parameters if available
+      if (userLocation) {
+        params.lat = userLocation.latitude;
+        params.lon = userLocation.longitude;
+        // Note: radius is hardcoded to 50 on backend
+      }
+
+      const data = await searchEvents(params);
       setEvents(data);
     } catch (error) {
       console.error('Error searching events:', error);
@@ -53,10 +102,12 @@ export const Home: React.FC = () => {
       {/* Hero Section */}
       <div className="text-center mb-12">
         <h1 className="text-4xl md:text-5xl font-bold mb-4">
-          Discover Events & Exclusive Deals
+          {isDealsEnabled() ? 'Discover Events & Exclusive Deals' : 'Discover Events Near You'}
         </h1>
         <p className="text-xl text-muted-foreground mb-8">
-          Find amazing pre-event deals from nearby restaurants and bars
+          {isDealsEnabled()
+            ? 'Find amazing pre-event deals from nearby restaurants and bars'
+            : 'Find concerts, sports, theater and more happening in your area'}
         </p>
 
         {/* Feature Limitation CTA */}
@@ -129,16 +180,20 @@ export const Home: React.FC = () => {
                 <CardDescription>
                   <div className="flex items-start gap-2 mt-2">
                     <Calendar className="h-4 w-4 flex-shrink-0 mt-0.5" />
-                    <span>{formatDate(event.date)}</span>
+                    <span>{formatDate((event as any).dates || (event as any).date)}</span>
                   </div>
                   <div className="flex items-start gap-2 mt-1">
                     <MapPin className="h-4 w-4 flex-shrink-0 mt-0.5" />
-                    <span className="line-clamp-1">{event.venue}</span>
+                    <span className="line-clamp-1">
+                      {event.venue || (event as any)._embedded?.venues?.[0]?.name || 'Venue TBD'}
+                    </span>
                   </div>
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Button className="w-full">View Deals</Button>
+                <Button className="w-full">
+                  {isDealsEnabled() ? 'View Deals' : 'View Event'}
+                </Button>
               </CardContent>
             </Card>
           ))}

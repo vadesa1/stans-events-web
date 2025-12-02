@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './contexts/AuthContext';
 import { Layout } from './components/Layout';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { ScrollToTop } from './components/ScrollToTop';
 import { Home } from './pages/Home';
 import { EventDetails } from './pages/EventDetails';
 import { DealDetails } from './pages/DealDetails';
@@ -11,7 +12,11 @@ import { SignUp } from './pages/SignUp';
 import { Checkout } from './pages/Checkout';
 import { Vouchers } from './pages/Vouchers';
 import { Profile } from './pages/Profile';
+import { PrivacyPolicy } from './pages/PrivacyPolicy';
+import { TermsOfService } from './pages/TermsOfService';
+import { SmsOptIn } from './pages/SmsOptIn';
 import { Toaster } from 'sonner';
+import { isDealsEnabled } from './lib/featureFlags';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -26,30 +31,40 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
+        <ScrollToTop />
         <AuthProvider>
           <Routes>
             <Route path="/" element={<Layout />}>
               <Route index element={<Home />} />
               <Route path="events/:id" element={<EventDetails />} />
-              <Route path="deals/:id" element={<DealDetails />} />
               <Route path="login" element={<Login />} />
               <Route path="signup" element={<SignUp />} />
-              <Route
-                path="checkout/:id"
-                element={
-                  <ProtectedRoute>
-                    <Checkout />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="vouchers"
-                element={
-                  <ProtectedRoute>
-                    <Vouchers />
-                  </ProtectedRoute>
-                }
-              />
+              <Route path="privacy" element={<PrivacyPolicy />} />
+              <Route path="terms" element={<TermsOfService />} />
+              <Route path="sms-opt-in" element={<SmsOptIn />} />
+
+              {/* Deal-related routes - only available when deals feature is enabled */}
+              {isDealsEnabled() && (
+                <>
+                  <Route path="deals/:id" element={<DealDetails />} />
+                  <Route
+                    path="checkout/:id"
+                    element={
+                      <ProtectedRoute>
+                        <Checkout />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="vouchers"
+                    element={
+                      <ProtectedRoute>
+                        <Vouchers />
+                      </ProtectedRoute>
+                    }
+                  />
+                </>
+              )}
               <Route
                 path="profile"
                 element={

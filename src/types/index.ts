@@ -1,19 +1,53 @@
 /**
  * Event model from backend
+ * Supports both simplified format (from listing) and Ticketmaster format (from single event fetch)
  */
 export interface Event {
   id: string;
   ticketmaster_id?: string;
   name: string;
-  venue: string;
-  date: string;
-  latitude: number;
-  longitude: number;
-  source: 'ticketmaster' | 'admin_created' | 'restaurant_created';
-  approval_status: 'approved' | 'pending_approval' | 'rejected';
+  venue?: string; // Optional for Ticketmaster format
+  date?: string; // Simple format from listing
+  dates?: { // Ticketmaster format from single event fetch
+    start: {
+      localDate?: string;
+      localTime?: string;
+      dateTime?: string;
+    };
+  };
+  _embedded?: { // Ticketmaster venue data
+    venues?: Array<{
+      name?: string;
+      location?: {
+        latitude?: string;
+        longitude?: string;
+      };
+      address?: {
+        line1?: string;
+      };
+      city?: {
+        name?: string;
+      };
+      state?: {
+        name?: string;
+        stateCode?: string;
+      };
+    }>;
+  };
+  latitude?: number;
+  longitude?: number;
+  source?: 'ticketmaster' | 'admin_created' | 'restaurant_created';
+  approval_status?: 'approved' | 'pending_approval' | 'rejected';
   category?: string;
   image_url?: string;
+  images?: Array<{ // Ticketmaster images
+    url: string;
+    ratio?: string;
+    width?: number;
+    height?: number;
+  }>;
   description?: string;
+  info?: string; // Ticketmaster description field
   address?: string;
   city?: string;
   state?: string;
@@ -98,6 +132,9 @@ export interface User {
  */
 export interface PaymentIntentResponse {
   client_secret: string;
+  paymentIntent?: string; // For backward compatibility with mobile app
+  publishableKey: string;
+  stripeAccountId: string; // Connected account ID for Direct Charges
   purchase_id: string;
 }
 
@@ -107,7 +144,8 @@ export interface PaymentIntentResponse {
 export interface DealPricing {
   original_price: number;
   discounted_price: number;
-  platform_fee: number;
+  platform_fee: number; // 18% commission
+  service_fee: number; // $1.99 flat service fee
   total_amount: number;
   savings_percentage: number;
 }

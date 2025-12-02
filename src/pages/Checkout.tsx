@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { loadStripe } from '@stripe/stripe-js';
+import { loadStripe, Stripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { getDeal, createPaymentIntent } from '@/lib/api';
 import { Deal } from '@/types';
@@ -9,8 +9,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 
-// Note: Replace with actual Stripe publishable key from environment
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_placeholder');
+const SERVICE_FEE = 1.99;
 
 const CheckoutForm: React.FC<{ deal: Deal; clientSecret: string }> = ({ deal, clientSecret }) => {
   const stripe = useStripe();
@@ -73,7 +72,7 @@ const CheckoutForm: React.FC<{ deal: Deal; clientSecret: string }> = ({ deal, cl
         size="lg"
         disabled={!stripe || processing}
       >
-        {processing ? 'Processing...' : `Pay ${formatCurrency(deal.discounted_price)}`}
+        {processing ? 'Processing...' : `Pay ${formatCurrency(deal.discounted_price + SERVICE_FEE)}`}
       </Button>
 
       <p className="text-xs text-center text-muted-foreground">
@@ -88,6 +87,7 @@ export const Checkout: React.FC = () => {
   const navigate = useNavigate();
   const [deal, setDeal] = useState<Deal | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -108,6 +108,18 @@ export const Checkout: React.FC = () => {
       // Create payment intent
       const paymentData = await createPaymentIntent(id);
       setClientSecret(paymentData.client_secret);
+
+      // Load Stripe with connected account for Direct Charges
+      const publishableKey = paymentData.publishableKey || import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+      const stripeAccountId = paymentData.stripeAccountId;
+
+      if (stripeAccountId) {
+        // For Direct Charges: load Stripe with connected account
+        setStripePromise(loadStripe(publishableKey, { stripeAccount: stripeAccountId }));
+      } else {
+        // Fallback to platform account
+        setStripePromise(loadStripe(publishableKey));
+      }
     } catch (err: any) {
       setError(err.message || 'Failed to load checkout');
     } finally {
@@ -126,7 +138,7 @@ export const Checkout: React.FC = () => {
     );
   }
 
-  if (error || !deal || !clientSecret) {
+  if (error || !deal || !clientSecret || !stripePromise) {
     return (
       <div className="container mx-auto px-4 py-8">
         <Card>
@@ -155,13 +167,27 @@ export const Checkout: React.FC = () => {
             <CardDescription>{deal.description}</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-baseline justify-between">
-              <span className="text-muted-foreground">Total Amount</span>
-              <div className="text-right">
-                <p className="text-2xl font-bold">{formatCurrency(deal.discounted_price)}</p>
-                <p className="text-sm text-muted-foreground line-through">
-                  {formatCurrency(deal.original_price)}
-                </p>
+            <div className="space-y-3">
+              <div className="flex items-baseline justify-between">
+                <span className="text-muted-foreground">Deal Price</span>
+                <div className="text-right">
+                  <p className="text-xl font-semibold">{formatCurrency(deal.discounted_price)}</p>
+                  <p className="text-sm text-muted-foreground line-through">
+                    {formatCurrency(deal.original_price)}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-baseline justify-between text-sm">
+                <span className="text-muted-foreground">Service Fee</span>
+                <span>{formatCurrency(SERVICE_FEE)}</span>
+              </div>
+
+              <div className="border-t pt-3">
+                <div className="flex items-baseline justify-between">
+                  <span className="font-semibold text-lg">Total Amount</span>
+                  <p className="text-2xl font-bold">{formatCurrency(deal.discounted_price + SERVICE_FEE)}</p>
+                </div>
               </div>
             </div>
           </CardContent>

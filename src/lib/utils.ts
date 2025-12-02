@@ -17,26 +17,80 @@ export function formatCurrency(amount: number): string {
 
 /**
  * Format date to readable string
+ * Handles both simple date strings and Ticketmaster nested date structures
  */
-export function formatDate(date: string | Date): string {
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(new Date(date));
+export function formatDate(date: string | Date | any): string {
+  try {
+    // Handle null/undefined
+    if (!date) return "Date TBD";
+
+    // Handle Ticketmaster nested structure
+    if (typeof date === 'object' && date.start) {
+      const dateStr = date.start.dateTime || date.start.localDate;
+      if (!dateStr) return "Date TBD";
+      return new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }).format(new Date(dateStr));
+    }
+
+    // Handle standard date string or Date object
+    const parsedDate = new Date(date);
+    if (isNaN(parsedDate.getTime())) {
+      return "Date TBD";
+    }
+
+    return new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }).format(parsedDate);
+  } catch (error) {
+    console.error("Error formatting date:", error, date);
+    return "Date TBD";
+  }
 }
 
 /**
  * Format date and time
+ * Handles both simple date strings and Ticketmaster nested date structures
  */
-export function formatDateTime(date: string | Date): string {
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(new Date(date));
+export function formatDateTime(date: string | Date | any): string {
+  try {
+    // Handle null/undefined
+    if (!date) return "Date & Time TBD";
+
+    // Handle Ticketmaster nested structure
+    if (typeof date === 'object' && date.start) {
+      const dateStr = date.start.dateTime || date.start.localDate;
+      if (!dateStr) return "Date & Time TBD";
+      return new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+      }).format(new Date(dateStr));
+    }
+
+    // Handle standard date string or Date object
+    const parsedDate = new Date(date);
+    if (isNaN(parsedDate.getTime())) {
+      return "Date & Time TBD";
+    }
+
+    return new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    }).format(parsedDate);
+  } catch (error) {
+    console.error("Error formatting date time:", error, date);
+    return "Date & Time TBD";
+  }
 }
 
 /**
