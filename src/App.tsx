@@ -12,6 +12,9 @@ import { SignUp } from './pages/SignUp';
 import { Checkout } from './pages/Checkout';
 import { Vouchers } from './pages/Vouchers';
 import { Profile } from './pages/Profile';
+import { PrivacyPolicy } from './pages/PrivacyPolicy';
+import { TermsOfService } from './pages/TermsOfService';
+import { SmsOptIn } from './pages/SmsOptIn';
 import { Toaster } from 'sonner';
 
 const queryClient = new QueryClient({
@@ -36,6 +39,9 @@ function App() {
               <Route path="deals/:id" element={<DealDetails />} />
               <Route path="login" element={<Login />} />
               <Route path="signup" element={<SignUp />} />
+              <Route path="privacy" element={<PrivacyPolicy />} />
+              <Route path="terms" element={<TermsOfService />} />
+              <Route path="sms-opt-in" element={<SmsOptIn />} />
               <Route
                 path="checkout/:id"
                 element={
