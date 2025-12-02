@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, Calendar, MapPin, Smartphone } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
+import { isDealsEnabled } from '@/lib/featureFlags';
 
 export const Home: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
@@ -101,10 +102,12 @@ export const Home: React.FC = () => {
       {/* Hero Section */}
       <div className="text-center mb-12">
         <h1 className="text-4xl md:text-5xl font-bold mb-4">
-          Discover Events & Exclusive Deals
+          {isDealsEnabled() ? 'Discover Events & Exclusive Deals' : 'Discover Events Near You'}
         </h1>
         <p className="text-xl text-muted-foreground mb-8">
-          Find amazing pre-event deals from nearby restaurants and bars
+          {isDealsEnabled()
+            ? 'Find amazing pre-event deals from nearby restaurants and bars'
+            : 'Find concerts, sports, theater and more happening in your area'}
         </p>
 
         {/* Feature Limitation CTA */}
@@ -188,7 +191,9 @@ export const Home: React.FC = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Button className="w-full">View Deals</Button>
+                <Button className="w-full">
+                  {isDealsEnabled() ? 'View Deals' : 'View Event'}
+                </Button>
               </CardContent>
             </Card>
           ))}

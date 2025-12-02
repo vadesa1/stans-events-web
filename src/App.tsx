@@ -16,6 +16,7 @@ import { PrivacyPolicy } from './pages/PrivacyPolicy';
 import { TermsOfService } from './pages/TermsOfService';
 import { SmsOptIn } from './pages/SmsOptIn';
 import { Toaster } from 'sonner';
+import { isDealsEnabled } from './lib/featureFlags';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -36,28 +37,34 @@ function App() {
             <Route path="/" element={<Layout />}>
               <Route index element={<Home />} />
               <Route path="events/:id" element={<EventDetails />} />
-              <Route path="deals/:id" element={<DealDetails />} />
               <Route path="login" element={<Login />} />
               <Route path="signup" element={<SignUp />} />
               <Route path="privacy" element={<PrivacyPolicy />} />
               <Route path="terms" element={<TermsOfService />} />
               <Route path="sms-opt-in" element={<SmsOptIn />} />
-              <Route
-                path="checkout/:id"
-                element={
-                  <ProtectedRoute>
-                    <Checkout />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="vouchers"
-                element={
-                  <ProtectedRoute>
-                    <Vouchers />
-                  </ProtectedRoute>
-                }
-              />
+
+              {/* Deal-related routes - only available when deals feature is enabled */}
+              {isDealsEnabled() && (
+                <>
+                  <Route path="deals/:id" element={<DealDetails />} />
+                  <Route
+                    path="checkout/:id"
+                    element={
+                      <ProtectedRoute>
+                        <Checkout />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="vouchers"
+                    element={
+                      <ProtectedRoute>
+                        <Vouchers />
+                      </ProtectedRoute>
+                    }
+                  />
+                </>
+              )}
               <Route
                 path="profile"
                 element={
